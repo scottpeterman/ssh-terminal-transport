@@ -1,0 +1,10 @@
+# STT — SSH Terminal Transport
+# Direct dependencies only. Transitive deps (cffi, pyasn1, etc.) install automatically.
+
+# Core proxy (static mode)
+paramiko>=4.0
+pyyaml>=6.0
+
+# Dynamic mode (--api) + discover module
+aiohttp>=3.9
+pysnmp==7.1.22

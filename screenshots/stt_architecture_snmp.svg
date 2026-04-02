@@ -1,0 +1,201 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 950" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="sshGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#e65100"/>
+      <stop offset="100%" stop-color="#ff8f00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="950" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="700" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="#1a1a1a">SSH Terminal Transport (STT) — Architecture Overview</text>
+  <text x="700" y="58" text-anchor="middle" font-size="13" fill="#666">stt-snmp: Transparent SNMP proxy over interactive SSH terminal sessions</text>
+
+  <!-- ============================================================ -->
+  <!-- LOCAL MACHINE -->
+  <!-- ============================================================ -->
+  <rect x="30" y="80" width="620" height="840" rx="12" fill="#e3f2fd" fill-opacity="0.35" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="50" y="105" font-size="17" font-weight="700" fill="#1565c0">Local Machine</text>
+
+  <!-- SNMP Tools -->
+  <rect x="60" y="125" width="560" height="105" rx="8" fill="#fff" stroke="#e0e0e0" stroke-dasharray="6,3" filter="url(#shadow)"/>
+  <text x="80" y="148" font-size="13" font-weight="600" fill="#666">Any SNMP Tool</text>
+  <rect x="80"  y="160" width="105" height="32" rx="6" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="132" y="181" text-anchor="middle" font-size="11" fill="#333">snmpwalk</text>
+  <rect x="198" y="160" width="105" height="32" rx="6" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="250" y="181" text-anchor="middle" font-size="11" fill="#333">snmpget</text>
+  <rect x="316" y="160" width="105" height="32" rx="6" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="368" y="181" text-anchor="middle" font-size="11" fill="#333">trafikwatch</text>
+  <rect x="434" y="160" width="115" height="32" rx="6" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="491" y="175" text-anchor="middle" font-size="11" fill="#333">Secure</text>
+  <text x="491" y="188" text-anchor="middle" font-size="11" fill="#333">Cartography</text>
+  <text x="340" y="215" text-anchor="middle" font-size="10" fill="#999">Standard UDP SNMP — tools are unaware of the tunnel</text>
+
+  <!-- Arrow: tools → listeners -->
+  <line x1="340" y1="230" x2="340" y2="260" stroke="#f9a825" stroke-width="2" marker-end="url(#arrowYellow)"/>
+  <text x="440" y="250" font-size="10" font-weight="600" fill="#f9a825">UDP localhost:10001-10007</text>
+
+  <!-- UDP Listeners -->
+  <rect x="60" y="265" width="560" height="95" rx="8" fill="#f3e5f5" stroke="#ab47bc" filter="url(#shadow)"/>
+  <text x="80" y="288" font-size="13" font-weight="600" fill="#6a1b9a">snmpproxy_local.py — UDP Listeners</text>
+  <g font-size="9" text-anchor="middle">
+    <rect x="75"  y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="107" y="315" fill="#333">:10001</text><text x="107" y="328" fill="#666">agg1</text>
+    <rect x="148" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="180" y="315" fill="#333">:10002</text><text x="180" y="328" fill="#666">agg2</text>
+    <rect x="221" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="253" y="315" fill="#333">:10003</text><text x="253" y="328" fill="#666">peer1</text>
+    <rect x="294" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="326" y="315" fill="#333">:10004</text><text x="326" y="328" fill="#666">edge01</text>
+    <rect x="367" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="399" y="315" fill="#333">:10005</text><text x="399" y="328" fill="#666">edge03</text>
+    <rect x="440" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="472" y="315" fill="#333">:10006</text><text x="472" y="328" fill="#666">e1-01</text>
+    <rect x="513" y="298" width="65" height="42" rx="4" fill="#e1bee7" stroke="#ab47bc"/>
+    <text x="545" y="315" fill="#333">:10007</text><text x="545" y="328" fill="#666">e1-02</text>
+  </g>
+
+  <!-- Arrow: listeners → protocol -->
+  <line x1="340" y1="360" x2="340" y2="390" stroke="#ab47bc" stroke-width="2"/>
+  <text x="420" y="380" font-size="10" fill="#ab47bc">Raw PDU bytes</text>
+
+  <!-- STT Protocol Layer -->
+  <rect x="60" y="395" width="560" height="70" rx="8" fill="#e8f5e9" stroke="#66bb6a" filter="url(#shadow)"/>
+  <text x="80" y="418" font-size="13" font-weight="600" fill="#2e7d32">STT Protocol Layer</text>
+  <text x="80" y="433" font-size="11" fill="#555">snmpproxy_protocol.py</text>
+  <text x="80" y="452" font-size="10" fill="#777">Base64 encode/decode · Sentinel framing (~##~) · msg_id correlation · FrameReader state machine</text>
+
+  <!-- Arrow: protocol → ChannelWriter -->
+  <line x1="340" y1="465" x2="340" y2="495" stroke="#66bb6a" stroke-width="2"/>
+
+  <!-- ChannelWriter (NEW) -->
+  <rect x="60" y="500" width="560" height="70" rx="8" fill="#fff3e0" stroke="#ff9800" stroke-width="2" filter="url(#shadow)"/>
+  <text x="80" y="523" font-size="13" font-weight="700" fill="#e65100">ChannelWriter — Serialized Write Queue</text>
+  <text x="80" y="540" font-size="10" fill="#555">Single drain loop owns all channel writes · Coalesces queued frames into batches (≤16KB)</text>
+  <text x="80" y="555" font-size="10" fill="#555">Prevents frame interleaving from concurrent asyncio coroutines · Runs sendall() in executor</text>
+
+  <!-- Arrow: writer → SSH -->
+  <line x1="340" y1="570" x2="340" y2="600" stroke="#ff9800" stroke-width="2"/>
+  <text x="130" y="590" font-size="9" font-family="monospace" fill="#e65100">~##~REQ|000001|host:port|b64...~##~</text>
+
+  <!-- SCNG SSH Client -->
+  <rect x="60" y="605" width="560" height="70" rx="8" fill="#e8eaf6" stroke="#5c6bc0" filter="url(#shadow)"/>
+  <text x="80" y="628" font-size="13" font-weight="600" fill="#283593">SCNG SSH Client</text>
+  <text x="80" y="643" font-size="11" fill="#555">ssh_client.py (invoke-shell)</text>
+  <text x="80" y="662" font-size="10" fill="#777">Legacy cipher/KEX · Key auth (Ed25519/RSA/ECDSA) · Prompt detection · ANSI filtering</text>
+
+  <!-- Concurrency + Timeouts boxes -->
+  <rect x="60" y="695" width="200" height="55" rx="6" fill="#fff" stroke="#bdbdbd"/>
+  <text x="75" y="714" font-size="11" font-weight="600" fill="#333">Concurrency</text>
+  <text x="75" y="730" font-size="10" fill="#666">asyncio event loop (UDP)</text>
+  <text x="75" y="742" font-size="10" fill="#666">+ reader thread (SSH)</text>
+  <rect x="275" y="695" width="200" height="55" rx="6" fill="#fff" stroke="#bdbdbd"/>
+  <text x="290" y="714" font-size="11" font-weight="600" fill="#333">Timeouts</text>
+  <text x="290" y="730" font-size="10" fill="#666">Per-request: 10s</text>
+  <text x="290" y="742" font-size="10" fill="#666">Keepalive: PING/PONG 30s</text>
+
+  <!-- PTY Fix box -->
+  <rect x="60" y="765" width="560" height="55" rx="6" fill="#fce4ec" stroke="#e53935"/>
+  <text x="75" y="784" font-size="11" font-weight="600" fill="#c62828">PTY Hardening</text>
+  <text x="75" y="800" font-size="10" fill="#666">stty raw -echo · exec (replaces bash) · stderr → /tmp/snmpproxy_agent.log · python3 -u (unbuffered)</text>
+  <text x="75" y="812" font-size="10" fill="#666">Single combined command — bash parses in cooked mode, then switches to raw</text>
+
+  <!-- Boot sequence note -->
+  <rect x="60" y="835" width="560" height="50" rx="6" fill="#fff" stroke="#bdbdbd"/>
+  <text x="75" y="854" font-size="11" font-weight="600" fill="#333">Boot: connect → find_prompt → stty+exec+2&gt; → PING/PONG → ChannelWriter + reader → listeners</text>
+  <text x="75" y="870" font-size="10" fill="#666">Dynamic mode (--api): REST API on :8901 for runtime target registration · Auto port allocation</text>
+
+  <!-- ============================================================ -->
+  <!-- SSH TUNNEL (center) -->
+  <!-- ============================================================ -->
+  <rect x="655" y="605" width="130" height="70" rx="10" fill="none" stroke="url(#sshGrad)" stroke-width="3" stroke-dasharray="8,4"/>
+  <text x="720" y="635" text-anchor="middle" font-size="11" font-weight="700" fill="#e65100">SSH Encrypted</text>
+  <text x="720" y="650" text-anchor="middle" font-size="11" font-weight="700" fill="#e65100">Tunnel</text>
+  <text x="720" y="665" text-anchor="middle" font-size="9" fill="#ff8f00">Interactive shell session</text>
+
+  <!-- SSH arrows -->
+  <line x1="620" y1="635" x2="655" y2="635" stroke="#e65100" stroke-width="2.5" marker-end="url(#arrowOrange)"/>
+  <line x1="785" y1="645" x2="820" y2="645" stroke="#e65100" stroke-width="2.5" marker-end="url(#arrowOrange)"/>
+
+  <!-- ============================================================ -->
+  <!-- REMOTE JUMPBOX -->
+  <!-- ============================================================ -->
+  <rect x="780" y="80" width="590" height="600" rx="12" fill="#e8f5e9" fill-opacity="0.3" stroke="#a5d6a7" stroke-width="1.5"/>
+  <text x="800" y="105" font-size="17" font-weight="700" fill="#2e7d32">Remote Jumpbox</text>
+
+  <!-- Requirements badge -->
+  <rect x="1130" y="88" width="220" height="95" rx="8" fill="#fff9c4" stroke="#fdd835" filter="url(#shadow)"/>
+  <text x="1145" y="108" font-size="11" font-weight="600" fill="#f57f17">✓ Python 3.7+ stdlib only</text>
+  <text x="1145" y="124" font-size="11" fill="#666">✓ No pip packages</text>
+  <text x="1145" y="140" font-size="11" fill="#666">✓ No listening ports</text>
+  <text x="1145" y="156" font-size="11" fill="#666">✓ No root required</text>
+  <text x="1145" y="172" font-size="11" fill="#666">✓ No daemon/service</text>
+
+  <!-- Target Network Devices -->
+  <rect x="810" y="125" width="540" height="110" rx="8" fill="#ffebee" stroke="#ef5350" filter="url(#shadow)"/>
+  <text x="830" y="148" font-size="13" font-weight="600" fill="#c62828">Target Network Devices</text>
+  <g font-size="9" text-anchor="middle">
+    <rect x="825" y="158" width="110" height="55" rx="5" fill="#ffcdd2" stroke="#ef5350"/>
+    <text x="880" y="175" font-weight="600" fill="#333">agg1.iad1</text>
+    <text x="880" y="188" fill="#666">172.17.1.128</text>
+    <text x="880" y="201" fill="#999">Arista EOS</text>
+    <rect x="945" y="158" width="110" height="55" rx="5" fill="#ffcdd2" stroke="#ef5350"/>
+    <text x="1000" y="175" font-weight="600" fill="#333">agg2.iad1</text>
+    <text x="1000" y="188" fill="#666">172.17.1.1</text>
+    <text x="1000" y="201" fill="#999">Arista EOS</text>
+    <rect x="1065" y="158" width="110" height="55" rx="5" fill="#ffcdd2" stroke="#ef5350"/>
+    <text x="1120" y="175" font-weight="600" fill="#333">peer1-02</text>
+    <text x="1120" y="188" fill="#666">172.17.1.131</text>
+    <text x="1120" y="201" fill="#999">Arista EOS</text>
+    <rect x="1185" y="158" width="110" height="55" rx="5" fill="#ffcdd2" stroke="#ef5350"/>
+    <text x="1240" y="175" font-weight="600" fill="#333">edge01</text>
+    <text x="1240" y="188" fill="#666">172.17.1.24</text>
+    <text x="1240" y="201" fill="#999">Juniper</text>
+  </g>
+  <text x="1300" y="228" font-size="10" fill="#999">+3 more Juniper</text>
+
+  <!-- Arrow: devices ← agent -->
+  <line x1="1080" y1="240" x2="1080" y2="280" stroke="#ef5350" stroke-width="2"/>
+  <text x="1130" y="265" font-size="10" font-weight="600" fill="#ef5350">UDP :161</text>
+
+  <!-- Remote Agent -->
+  <rect x="810" y="285" width="540" height="100" rx="8" fill="#fff" stroke="#66bb6a" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="830" y="310" font-size="13" font-weight="600" fill="#2e7d32">snmpproxy_remote.py — UDP Relay Agent</text>
+  <text x="830" y="330" font-size="10" fill="#555">select() multiplexing on stdin + UDP socket · os.read() (not readline)</text>
+  <text x="830" y="345" font-size="10" fill="#555">SNMP request-id extraction (BER/ASN.1) · write_batch() coalescing</text>
+  <text x="830" y="360" font-size="10" fill="#555">Timeout tracking per request (5s + 1 retry) · Periodic stats · Exception armor</text>
+  <text x="830" y="375" font-size="10" fill="#555">Stale flush on PING · stdin watchdog (120s) · PDU validation · Pending cap (500)</text>
+
+  <!-- Arrow: agent ← protocol -->
+  <line x1="1080" y1="390" x2="1080" y2="430" stroke="#66bb6a" stroke-width="2"/>
+  <text x="1130" y="415" font-size="10" fill="#66bb6a">Decoded PDU bytes</text>
+
+  <!-- Remote Protocol Layer -->
+  <rect x="810" y="435" width="540" height="65" rx="8" fill="#e8f5e9" stroke="#66bb6a" filter="url(#shadow)"/>
+  <text x="830" y="458" font-size="13" font-weight="600" fill="#2e7d32">STT Protocol Layer</text>
+  <text x="830" y="473" font-size="11" fill="#555">snmpproxy_protocol.py (same file)</text>
+  <text x="830" y="490" font-size="10" fill="#777">FrameReader on stdin · Base64 decode · msg_id echo · Sentinel framing on stdout</text>
+
+  <!-- Arrow: protocol ← stdin/stdout -->
+  <line x1="1080" y1="500" x2="1080" y2="540" stroke="#66bb6a" stroke-width="2"/>
+
+  <!-- stdin/stdout -->
+  <rect x="810" y="545" width="540" height="50" rx="8" fill="#f5f5f5" stroke="#9e9e9e" filter="url(#shadow)"/>
+  <text x="830" y="568" font-size="12" font-weight="600" fill="#333">stdin / stdout — Line-buffered text I/O (python3 -u)</text>
+  <text x="830" y="583" font-size="10" fill="#777">stderr → /tmp/snmpproxy_agent.log (configurable via remote_log)</text>
+
+  <!-- Arrow markers -->
+  <defs>
+    <marker id="arrowYellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#f9a825"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#e65100"/>
+    </marker>
+  </defs>
+</svg>

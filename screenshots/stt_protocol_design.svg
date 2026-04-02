@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 1100" font-family="'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="sh" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+    </filter>
+    <marker id="aR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#e65100"/>
+    </marker>
+    <marker id="aL" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#1565c0"/>
+    </marker>
+    <marker id="aG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#2e7d32"/>
+    </marker>
+  </defs>
+
+  <rect width="1400" height="1100" fill="#fafafa"/>
+
+  <!-- Title -->
+  <text x="700" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#1a1a1a">SSH Terminal Transport (STT) — Protocol Design</text>
+  <text x="700" y="52" text-anchor="middle" font-size="12" fill="#666">Multiplexed TCP/UDP relay over interactive SSH shell sessions</text>
+
+  <!-- ============================================================ -->
+  <!-- BOOT SEQUENCE (left half) -->
+  <!-- ============================================================ -->
+  <text x="30" y="82" font-size="16" font-weight="700" fill="#1a1a1a">Boot Sequence</text>
+
+  <!-- Column headers -->
+  <rect x="30" y="92" width="120" height="28" rx="4" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text x="90" y="111" text-anchor="middle" font-size="10" font-weight="600" fill="#283593">Local Machine</text>
+  <rect x="170" y="92" width="130" height="28" rx="4" fill="#f5f5f5" stroke="#9e9e9e"/>
+  <text x="235" y="111" text-anchor="middle" font-size="10" font-weight="600" fill="#333">SSH Channel</text>
+  <rect x="320" y="92" width="120" height="28" rx="4" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="380" y="111" text-anchor="middle" font-size="10" font-weight="600" fill="#2e7d32">Jumpbox</text>
+
+  <!-- Step 1: SSHClient.connect() -->
+  <text x="15" y="148" font-size="13" fill="#999">①</text>
+  <rect x="35" y="133" width="110" height="24" rx="4" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="90" y="150" text-anchor="middle" font-size="10" font-weight="600" fill="#333">SSHClient.connect()</text>
+  <line x1="145" y1="145" x2="310" y2="145" stroke="#e65100" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="175" y="140" font-size="8" fill="#888">SSH kex + auth (key/password)</text>
+  <line x1="310" y1="155" x2="310" y2="155" stroke="#1565c0" stroke-width="1.5"/>
+  <text x="175" y="165" font-size="8" fill="#888">invoke_shell (PTY: xterm 200x24)</text>
+  <line x1="310" y1="168" x2="145" y2="168" stroke="#1565c0" stroke-width="1.5" marker-end="url(#aL)"/>
+  <text x="175" y="180" font-size="8" fill="#888">← banner, MOTD, ANSI</text>
+
+  <!-- Step 2: find_prompt() -->
+  <text x="15" y="208" font-size="13" fill="#999">②</text>
+  <rect x="35" y="193" width="110" height="24" rx="4" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text x="90" y="210" text-anchor="middle" font-size="10" font-weight="600" fill="#283593">find_prompt()</text>
+  <line x1="145" y1="205" x2="310" y2="205" stroke="#e65100" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="180" y="200" font-size="8" fill="#888">\n \n \n</text>
+  <line x1="310" y1="215" x2="145" y2="215" stroke="#1565c0" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="170" y="228" font-size="8" fill="#2e7d32">← user@jmp01:~$</text>
+
+  <!-- Step 3: stty + exec + stderr redirect -->
+  <text x="15" y="262" font-size="13" fill="#999">③</text>
+  <rect x="35" y="247" width="260" height="42" rx="4" fill="#fce4ec" stroke="#e53935"/>
+  <text x="45" y="264" font-size="10" font-weight="600" fill="#c62828">Single command — bash parses in cooked mode:</text>
+  <text x="45" y="280" font-size="9" font-family="monospace" fill="#555">stty raw -echo; exec python3 -u agent.py 2&gt;log</text>
+
+  <!-- PTY state callout -->
+  <rect x="310" y="240" width="145" height="58" rx="6" fill="#fff3e0" stroke="#ff9800"/>
+  <text x="320" y="256" font-size="9" font-weight="600" fill="#e65100">PTY: echo OFF, canonical OFF</text>
+  <text x="320" y="268" font-size="9" fill="#666">line discipline OFF</text>
+  <text x="320" y="280" font-size="9" fill="#666">bash replaced by agent (exec)</text>
+  <text x="320" y="292" font-size="9" fill="#666">stderr → file (off PTY)</text>
+
+  <!-- Agent starts callout -->
+  <rect x="345" y="305" width="100" height="22" rx="4" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="395" y="320" text-anchor="middle" font-size="9" font-weight="600" fill="#2e7d32">agent starts</text>
+
+  <!-- Step 4: PING/PONG -->
+  <text x="15" y="352" font-size="13" fill="#999">④</text>
+  <line x1="90" y1="340" x2="380" y2="340" stroke="#e65100" stroke-width="2" marker-end="url(#aR)"/>
+  <text x="155" y="336" font-size="9" font-family="monospace" fill="#e65100">~##~PING~##~</text>
+  <text x="160" y="360" font-size="8" fill="#888">FrameReader discards: command echo, python startup, ANSI</text>
+  <line x1="380" y1="370" x2="90" y2="370" stroke="#1565c0" stroke-width="2" marker-end="url(#aL)"/>
+  <text x="155" y="383" font-size="9" font-family="monospace" fill="#1565c0">~##~PONG~##~</text>
+
+  <!-- Handshake complete -->
+  <text x="35" y="403" font-size="10" font-weight="600" fill="#2e7d32">✓ Handshake complete</text>
+
+  <!-- Step 5: ChannelWriter + listeners -->
+  <text x="15" y="432" font-size="13" fill="#999">⑤</text>
+  <rect x="35" y="418" width="155" height="22" rx="4" fill="#fff3e0" stroke="#ff9800"/>
+  <text x="42" y="433" font-size="9" font-weight="600" fill="#e65100">ChannelWriter starts</text>
+  <rect x="200" y="418" width="150" height="22" rx="4" fill="#f3e5f5" stroke="#ab47bc"/>
+  <text x="208" y="433" font-size="9" fill="#333">UDP/TCP listeners start</text>
+
+  <!-- Step 6: Reader thread -->
+  <text x="15" y="462" font-size="13" fill="#999">⑥</text>
+  <rect x="35" y="448" width="155" height="22" rx="4" fill="#e3f2fd" stroke="#42a5f5"/>
+  <text x="42" y="463" font-size="9" fill="#333">Reader thread + keepalive loop</text>
+
+  <!-- Keepalive arrows -->
+  <line x1="90" y1="485" x2="380" y2="485" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="155" y="481" font-size="8" font-family="monospace" fill="#999">~##~PING~##~</text>
+  <line x1="380" y1="495" x2="90" y2="495" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="155" y="508" font-size="8" font-family="monospace" fill="#999">~##~PONG~##~</text>
+  <text x="160" y="522" font-size="8" fill="#999">every 30s — detects dead tunnels</text>
+
+  <!-- QUIT -->
+  <line x1="90" y1="540" x2="380" y2="540" stroke="#e53935" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="155" y="536" font-size="8" font-family="monospace" fill="#e53935">~##~QUIT~##~</text>
+  <text x="200" y="555" font-size="8" fill="#999">clean shutdown</text>
+
+  <!-- ============================================================ -->
+  <!-- TCP STREAM LIFECYCLE (right half) -->
+  <!-- ============================================================ -->
+  <text x="500" y="82" font-size="16" font-weight="700" fill="#1a1a1a">TCP Stream Lifecycle</text>
+
+  <!-- Column headers -->
+  <rect x="500" y="92" width="90" height="28" rx="4" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="545" y="111" text-anchor="middle" font-size="9" font-weight="600" fill="#333">TCP Tool</text>
+  <rect x="610" y="92" width="90" height="28" rx="4" fill="#f3e5f5" stroke="#ab47bc"/>
+  <text x="655" y="111" text-anchor="middle" font-size="9" font-weight="600" fill="#333">Local Proxy</text>
+  <rect x="750" y="92" width="90" height="28" rx="4" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="795" y="111" text-anchor="middle" font-size="9" font-weight="600" fill="#333">Remote Agent</text>
+  <rect x="890" y="92" width="90" height="28" rx="4" fill="#ffebee" stroke="#ef5350"/>
+  <text x="935" y="111" text-anchor="middle" font-size="9" font-weight="600" fill="#333">Target Device</text>
+
+  <!-- TCP connect to local -->
+  <line x1="545" y1="140" x2="645" y2="140" stroke="#f9a825" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="552" y="136" font-size="8" fill="#888">TCP connect to localhost:12001</text>
+
+  <!-- assign stream_id -->
+  <rect x="615" y="148" width="85" height="18" rx="3" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="657" y="161" text-anchor="middle" font-size="8" fill="#333">assign stream_id</text>
+
+  <!-- OPEN -->
+  <line x1="655" y1="175" x2="795" y2="175" stroke="#e65100" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aR)"/>
+  <text x="665" y="170" font-size="7" font-family="monospace" fill="#e65100">~##~OPEN|000001|10.255.255.1:22~##~</text>
+
+  <!-- TCP connect to target -->
+  <line x1="795" y1="195" x2="935" y2="195" stroke="#ef5350" stroke-width="1.5" marker-end="url(#aR)"/>
+  <text x="830" y="190" font-size="8" fill="#888">TCP connect</text>
+  <line x1="935" y1="205" x2="795" y2="205" stroke="#2e7d32" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="860" y="218" font-size="8" fill="#888">connected</text>
+
+  <!-- OPENED -->
+  <line x1="795" y1="230" x2="655" y2="230" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aL)"/>
+  <text x="665" y="226" font-size="7" font-family="monospace" fill="#1565c0">~##~OPENED|000001~##~</text>
+
+  <!-- Bidirectional Data Transfer label -->
+  <text x="730" y="258" font-size="12" font-weight="600" fill="#333">Bidirectional Data Transfer</text>
+
+  <!-- Client → remote data flow -->
+  <line x1="545" y1="275" x2="645" y2="275" stroke="#f9a825" stroke-width="1"/>
+  <text x="570" y="270" font-size="8" fill="#888">raw bytes</text>
+  <rect x="620" y="280" width="80" height="16" rx="3" fill="#fff3e0" stroke="#ff9800"/>
+  <text x="660" y="292" text-anchor="middle" font-size="7" fill="#e65100">base64 + frame</text>
+  <line x1="655" y1="302" x2="795" y2="302" stroke="#e65100" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aR)"/>
+  <text x="665" y="298" font-size="7" font-family="monospace" fill="#e65100">~##~DATA|000001|{base64}~##~</text>
+  <rect x="780" y="308" width="80" height="16" rx="3" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="820" y="320" text-anchor="middle" font-size="7" fill="#2e7d32">decode + write</text>
+  <line x1="835" y1="330" x2="935" y2="330" stroke="#ef5350" stroke-width="1"/>
+  <text x="860" y="326" font-size="8" fill="#888">raw bytes</text>
+
+  <!-- Remote → client data flow -->
+  <line x1="935" y1="350" x2="835" y2="350" stroke="#2e7d32" stroke-width="1"/>
+  <text x="860" y="346" font-size="8" fill="#888">raw bytes</text>
+  <rect x="780" y="355" width="80" height="16" rx="3" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="820" y="367" text-anchor="middle" font-size="7" fill="#2e7d32">base64 + frame</text>
+  <line x1="795" y1="378" x2="655" y2="378" stroke="#1565c0" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aL)"/>
+  <text x="665" y="374" font-size="7" font-family="monospace" fill="#1565c0">~##~DATA|000001|{base64}~##~</text>
+  <rect x="620" y="384" width="80" height="16" rx="3" fill="#fff3e0" stroke="#ff9800"/>
+  <text x="660" y="396" text-anchor="middle" font-size="7" fill="#e65100">decode + write</text>
+  <line x1="645" y1="405" x2="545" y2="405" stroke="#f9a825" stroke-width="1"/>
+  <text x="570" y="401" font-size="8" fill="#888">raw bytes</text>
+
+  <!-- Chunking note -->
+  <rect x="620" y="420" width="180" height="28" rx="4" fill="#fff8e1" stroke="#f9a825"/>
+  <text x="630" y="436" font-size="8" fill="#555">Payloads &gt;16KB are split into</text>
+  <text x="630" y="446" font-size="8" fill="#555">multiple DATA frames (chunking)</text>
+
+  <!-- TCP disconnect / CLOSE -->
+  <line x1="545" y1="470" x2="645" y2="470" stroke="#e53935" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="555" y="466" font-size="8" fill="#e53935">TCP disconnect</text>
+  <line x1="655" y1="480" x2="795" y2="480" stroke="#e53935" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#aR)"/>
+  <text x="665" y="476" font-size="7" font-family="monospace" fill="#e53935">~##~CLOSE|000001~##~</text>
+  <line x1="835" y1="498" x2="935" y2="498" stroke="#e53935" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#aR)"/>
+  <text x="880" y="494" font-size="8" fill="#e53935">TCP close</text>
+  <line x1="795" y1="510" x2="655" y2="510" stroke="#e53935" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#aL)"/>
+  <text x="665" y="506" font-size="7" font-family="monospace" fill="#e53935">~##~CLOSE|000001~##~</text>
+
+  <!-- ============================================================ -->
+  <!-- WIRE FORMAT (bottom left) -->
+  <!-- ============================================================ -->
+  <rect x="30" y="585" width="460" height="110" rx="8" fill="#fff" stroke="#5c6bc0" filter="url(#sh)"/>
+  <text x="50" y="610" font-size="14" font-weight="700" fill="#283593">Wire Format — Sentinel-Framed Messages</text>
+
+  <!-- Frame diagram -->
+  <g transform="translate(50,625)">
+    <rect x="0" y="0" width="45" height="28" rx="3" fill="#fce4ec" stroke="#e53935"/>
+    <text x="22" y="18" text-anchor="middle" font-size="9" font-family="monospace" font-weight="700" fill="#c62828">~##~</text>
+    <rect x="50" y="0" width="45" height="28" rx="3" fill="#e8eaf6" stroke="#5c6bc0"/>
+    <text x="72" y="18" text-anchor="middle" font-size="9" font-family="monospace" font-weight="600" fill="#283593">DATA</text>
+    <rect x="100" y="0" width="10" height="28" fill="#f5f5f5" stroke="#ccc"/>
+    <text x="105" y="18" text-anchor="middle" font-size="11" fill="#999">|</text>
+    <rect x="115" y="0" width="55" height="28" rx="3" fill="#fff8e1" stroke="#f9a825"/>
+    <text x="142" y="18" text-anchor="middle" font-size="9" font-family="monospace" fill="#333">000001</text>
+    <rect x="175" y="0" width="10" height="28" fill="#f5f5f5" stroke="#ccc"/>
+    <text x="180" y="18" text-anchor="middle" font-size="11" fill="#999">|</text>
+    <rect x="190" y="0" width="155" height="28" rx="3" fill="#e8f5e9" stroke="#66bb6a"/>
+    <text x="267" y="18" text-anchor="middle" font-size="9" font-family="monospace" fill="#333">U1NILTIuMC1PcGVu...</text>
+    <rect x="350" y="0" width="45" height="28" rx="3" fill="#fce4ec" stroke="#e53935"/>
+    <text x="372" y="18" text-anchor="middle" font-size="9" font-family="monospace" font-weight="700" fill="#c62828">~##~</text>
+    <rect x="400" y="0" width="25" height="28" rx="3" fill="#f5f5f5" stroke="#ccc"/>
+    <text x="412" y="18" text-anchor="middle" font-size="9" font-family="monospace" fill="#999">\n</text>
+
+    <!-- Labels -->
+    <text x="22"  y="48" text-anchor="middle" font-size="8" fill="#e53935">sentinel</text>
+    <text x="72"  y="48" text-anchor="middle" font-size="8" fill="#5c6bc0">msg type</text>
+    <text x="142" y="48" text-anchor="middle" font-size="8" fill="#f9a825">stream ID</text>
+    <text x="267" y="48" text-anchor="middle" font-size="8" fill="#2e7d32">base64-encoded payload</text>
+    <text x="372" y="48" text-anchor="middle" font-size="8" fill="#e53935">sentinel</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- MESSAGE TYPES (bottom center) -->
+  <!-- ============================================================ -->
+  <rect x="510" y="585" width="370" height="200" rx="8" fill="#fff" stroke="#66bb6a" filter="url(#sh)"/>
+  <text x="530" y="610" font-size="14" font-weight="700" fill="#2e7d32">Message Types</text>
+
+  <g font-size="10" font-family="monospace">
+    <text x="525" y="632" font-weight="600" fill="#333">SNMP:</text>
+    <text x="525" y="648" fill="#555">REQ   {msg_id}|{host}:{port}|{b64}  → request</text>
+    <text x="525" y="664" fill="#555">RSP   {msg_id}|OK|{b64}            ← success</text>
+    <text x="525" y="680" fill="#555">RSP   {msg_id}|TIMEOUT|            ← timeout</text>
+
+    <text x="525" y="702" font-weight="600" fill="#333">TCP:</text>
+    <text x="525" y="718" fill="#555">OPEN  {stream_id}|{host}:{port}    → connect</text>
+    <text x="525" y="734" fill="#555">OPENED {stream_id}                 ← success</text>
+    <text x="525" y="750" fill="#555">DATA  {stream_id}|{b64}            ↔ bidir</text>
+    <text x="525" y="766" fill="#555">CLOSE {stream_id}                  ↔ teardown</text>
+
+    <text x="660" y="632" font-weight="600" fill="#999">Control:</text>
+    <text x="760" y="648" fill="#999">PING → keepalive</text>
+    <text x="760" y="664" fill="#999">PONG ← keepalive</text>
+    <text x="760" y="680" fill="#999">QUIT → shutdown</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- FRAMEREADER STATE MACHINE (bottom right) -->
+  <!-- ============================================================ -->
+  <rect x="900" y="585" width="475" height="200" rx="8" fill="#fff" stroke="#5c6bc0" filter="url(#sh)"/>
+  <text x="920" y="610" font-size="14" font-weight="700" fill="#283593">FrameReader State Machine</text>
+  <text x="920" y="628" font-size="10" fill="#666">Feed raw text → extract framed messages</text>
+
+  <!-- States -->
+  <ellipse cx="975" cy="680" rx="55" ry="28" fill="#f5f5f5" stroke="#9e9e9e"/>
+  <text x="975" y="676" text-anchor="middle" font-size="10" font-weight="600" fill="#333">SCANNING</text>
+  <text x="975" y="692" text-anchor="middle" font-size="8" fill="#666">discard noise</text>
+
+  <ellipse cx="1145" cy="680" rx="55" ry="28" fill="#e8f5e9" stroke="#66bb6a"/>
+  <text x="1145" y="676" text-anchor="middle" font-size="9" font-weight="600" fill="#333">ACCUMULATE</text>
+  <text x="1145" y="692" text-anchor="middle" font-size="8" fill="#666">buffer payload</text>
+
+  <ellipse cx="1310" cy="680" rx="50" ry="28" fill="#f3e5f5" stroke="#ab47bc"/>
+  <text x="1310" y="676" text-anchor="middle" font-size="10" font-weight="600" fill="#333">DISPATCH</text>
+  <text x="1310" y="692" text-anchor="middle" font-size="8" fill="#666">parse + return</text>
+
+  <!-- Transitions -->
+  <line x1="1030" y1="675" x2="1090" y2="675" stroke="#66bb6a" stroke-width="2" marker-end="url(#aG)"/>
+  <text x="1055" y="668" text-anchor="middle" font-size="8" fill="#2e7d32">~##~ found</text>
+  <line x1="1200" y1="675" x2="1260" y2="675" stroke="#ab47bc" stroke-width="2"/>
+  <text x="1225" y="668" text-anchor="middle" font-size="8" fill="#7b1fa2">~##~ found</text>
+  <!-- Reset arc -->
+  <path d="M1310,708 Q1310,740 1145,740 Q975,740 975,708" fill="none" stroke="#9e9e9e" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="1145" y="755" text-anchor="middle" font-size="8" fill="#999">reset</text>
+
+  <!-- Noise self-loop -->
+  <path d="M950,655 Q950,635 975,635 Q1000,635 1000,655" fill="none" stroke="#e53935" stroke-width="1"/>
+  <text x="975" y="630" text-anchor="middle" font-size="7" fill="#e53935">noise (echo, ANSI, prompts)</text>
+
+  <!-- Details -->
+  <text x="920" y="780" font-size="9" fill="#555">• Handles frames split across reads</text>
+  <text x="1100" y="780" font-size="9" fill="#555">• Same parser on both sides</text>
+
+  <!-- ============================================================ -->
+  <!-- DESIGN PRINCIPLES (full width bottom) -->
+  <!-- ============================================================ -->
+  <rect x="30" y="810" width="1345" height="100" rx="8" fill="#fff" stroke="#bdbdbd" filter="url(#sh)"/>
+  <text x="50" y="835" font-size="14" font-weight="700" fill="#1a1a1a">Design Principles</text>
+
+  <g font-size="10">
+    <text x="50" y="858" fill="#555"><tspan font-weight="600" fill="#333">Terminal as transport</tspan> — The PTY channel carries structured messages, not interactive commands.</text>
+    <text x="50" y="876" fill="#555"><tspan font-weight="600" fill="#333">Text survives everything</tspan> — Base64 payloads pass through any encoding, line discipline, or character set.</text>
+    <text x="50" y="894" fill="#555"><tspan font-weight="600" fill="#333">Noise is invisible</tspan> — Sentinels make framing unambiguous. The FrameReader ignores everything else.</text>
+  </g>
+  <g font-size="10">
+    <text x="750" y="858" fill="#555"><tspan font-weight="600" fill="#333">Payload agnostic</tspan> — The protocol carries bytes. SNMP, SSH, HTTP, SQL — all the same.</text>
+    <text x="750" y="876" fill="#555"><tspan font-weight="600" fill="#333">Zero-install remote</tspan> — Two Python files, stdlib only, Python 3.7+. scp and run.</text>
+    <text x="750" y="894" fill="#555"><tspan font-weight="600" fill="#333">Serialized writes</tspan> — ChannelWriter prevents frame interleaving from concurrent streams.</text>
+  </g>
+</svg>
