@@ -36,6 +36,8 @@ SSH client: Uses SCNG SSHClient (scng/discovery/ssh/client.py)
 
 from __future__ import annotations
 
+from stttcp.socks5 import Socks5Listener
+
 import argparse
 import asyncio
 import logging
@@ -814,7 +816,7 @@ class TCPListener:
 # Main
 # ---------------------------------------------------------------------------
 
-async def run(cfg: ProxyConfig) -> None:
+async def run(cfg: ProxyConfig, socks_port: Optional[int] = None) -> None:
     tunnel = SSHTunnel(cfg)
 
     try:
@@ -826,8 +828,19 @@ async def run(cfg: ProxyConfig) -> None:
     loop = asyncio.get_running_loop()
     tunnel.start_reader(loop)
 
-    print(f"\n  stttcp — {len(cfg.targets)} targets via {cfg.ssh.host}")
+    print(f"\n  stttcp — via {cfg.ssh.host}")
     print()
+
+    # SOCKS5 mode: one dynamic listener reaches any host:port the
+    # client asks for, resolved on the remote side. Coexists with the
+    # static map — both share the same tunnel.
+    if socks_port is not None:
+        socks = Socks5Listener(tunnel, cfg.bind_address, socks_port)
+        await socks.start()
+        print(
+            f"    {cfg.bind_address}:{socks_port:<6} → SOCKS5 "
+            f"(dynamic, remote DNS)"
+        )
 
     for mapping in cfg.targets:
         listener = TCPListener(mapping, tunnel, cfg.bind_address)
@@ -837,7 +850,13 @@ async def run(cfg: ProxyConfig) -> None:
             f"{mapping.remote_addr:<21}  {mapping.display}"
         )
 
-    print(f"\n  Ready. Any TCP tool can connect to localhost.\n")
+    if socks_port is not None:
+        print(
+            f"\n  Ready. SOCKS5 on {cfg.bind_address}:{socks_port} "
+            f"(set browser socks_remote_dns=true).\n"
+        )
+    else:
+        print(f"\n  Ready. Any TCP tool can connect to localhost.\n")
 
     keepalive_task = asyncio.create_task(tunnel.keepalive_loop())
 
@@ -874,6 +893,12 @@ Then:
     parser.add_argument("-t", "--trace", action="store_true",
                         help="show protocol messages and stream lifecycle")
     parser.add_argument("-q", "--quiet", action="store_true")
+    parser.add_argument(
+        "--socks", nargs="?", const=1080, type=int, default=None,
+        metavar="PORT",
+        help="run a SOCKS5 proxy (dynamic targets, remote DNS) on PORT "
+             "(default 1080) instead of/alongside static maps",
+    )
 
     args = parser.parse_args()
 
@@ -903,7 +928,7 @@ Then:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
-    asyncio.run(run(cfg))
+    asyncio.run(run(cfg, socks_port=args.socks))
 
 
 if __name__ == "__main__":
